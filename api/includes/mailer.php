@@ -30,6 +30,8 @@ function sendAppEmail(string $toEmail, string $toName, string $subject, string $
         $mail->SMTPSecure = SMTP_SECURE;
         $mail->Port       = SMTP_PORT;
         $mail->CharSet    = 'UTF-8';
+        $mail->Timeout    = 20;          // important on serverless
+        $mail->SMTPKeepAlive = false;
 
         // Fix for XAMPP / Windows SSL errors
         $mail->SMTPOptions = [
