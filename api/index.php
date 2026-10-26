@@ -35,27 +35,30 @@ if (isLoggedIn()) {
             <h2>LOGIN</h2>
             <p class="subtitle">Sign in to your K-Tix Assist account</p>
             <div id="login-alert"></div>
-            <form id="login-form" onsubmit="return handleLogin(event)">
+            <form id="login-form" onsubmit="return handleLogin(event)" novalidate>
               <div id="login-form-fields">
                 <div class="form-group">
                   <label>Email Address <span class="required">*</span></label>
-                  <input type="email" class="form-control" id="login-email" placeholder="you@example.com" required>
+                  <input type="email" class="form-control" id="login-email" placeholder="you@example.com" autocomplete="email">
+                  <div class="field-error" id="err-login-email"><i class="fas fa-exclamation-circle"></i> <span></span></div>
                 </div>
                 <div class="form-group">
                   <label>Password <span class="required">*</span></label>
                   <div class="input-with-icon">
-                    <input type="password" class="form-control" id="login-password" placeholder="••••••••" required>
+                    <input type="password" class="form-control" id="login-password" placeholder="••••••••" autocomplete="current-password">
                     <button type="button" class="toggle-password" onclick="togglePassword('login-password', this)"><i class="fas fa-eye"></i></button>
                   </div>
+                  <div class="field-error" id="err-login-password"><i class="fas fa-exclamation-circle"></i> <span></span></div>
                 </div>
                 <div class="checkbox-group">
                   <input type="checkbox" id="remember-me">
-                  <label for="remember-me">Remember me on this device</label>
+                  <label for="remember-me">Remember me</label>
                 </div>
-                <div class="checkbox-group">
+                <div class="checkbox-group" id="login-policies-group">
                   <input type="checkbox" id="accept-policies">
                   <label for="accept-policies">I accept the <a href="#" onclick="openPolicies(event)">Terms of Service & Privacy Policy</a></label>
                 </div>
+                <div class="field-error" id="err-login-policies"><i class="fas fa-exclamation-circle"></i> <span></span></div>
                 <button type="submit" class="btn btn-primary" id="login-btn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
               </div>
             </form>
@@ -82,27 +85,32 @@ if (isLoggedIn()) {
             <div id="signup-step-1" class="signup-step">
               <div class="form-group">
                 <label>Full Name <span class="required">*</span></label>
-                <input type="text" class="form-control" id="signup-name" placeholder="Juan Dela Cruz" required>
+                <input type="text" class="form-control" id="signup-name" placeholder="Juan Dela Cruz" autocomplete="name">
+                <div class="field-error" id="err-signup-name"><i class="fas fa-exclamation-circle"></i> <span></span></div>
               </div>
               <div class="form-group">
                 <label>Email Address <span class="required">*</span></label>
-                <input type="email" class="form-control" id="signup-email" placeholder="you@example.com" required>
+                <input type="email" class="form-control" id="signup-email" placeholder="you@example.com" autocomplete="email">
+                <div class="field-error" id="err-signup-email"><i class="fas fa-exclamation-circle"></i> <span></span></div>
               </div>
               <div class="form-group">
                 <label>Password <span class="required">*</span></label>
                 <div class="input-with-icon">
-                  <input type="password" class="form-control" id="signup-password" placeholder="Min. 8 characters" required minlength="8">
+                  <input type="password" class="form-control" id="signup-password" placeholder="Min. 8 characters" autocomplete="new-password">
                   <button type="button" class="toggle-password" onclick="togglePassword('signup-password', this)"><i class="fas fa-eye"></i></button>
                 </div>
+                <div class="field-error" id="err-signup-password"><i class="fas fa-exclamation-circle"></i> <span></span></div>
               </div>
               <div class="form-group">
                 <label>Confirm Password <span class="required">*</span></label>
-                <input type="password" class="form-control" id="signup-password2" placeholder="Re-enter password" required>
+                <input type="password" class="form-control" id="signup-password2" placeholder="Re-enter password" autocomplete="new-password">
+                <div class="field-error" id="err-signup-password2"><i class="fas fa-exclamation-circle"></i> <span></span></div>
               </div>
-              <div class="checkbox-group">
+              <div class="checkbox-group" id="signup-policies-group">
                 <input type="checkbox" id="signup-policies">
                 <label for="signup-policies">I accept the <a href="#" onclick="openPolicies(event)">Terms of Service & Privacy Policy</a>. <strong>Denying prevents account creation.</strong></label>
               </div>
+              <div class="field-error" id="err-signup-policies"><i class="fas fa-exclamation-circle"></i> <span></span></div>
               <button type="button" class="btn btn-primary" onclick="goSignupStep2()">Continue <i class="fas fa-arrow-right"></i></button>
             </div>
 
@@ -155,6 +163,7 @@ if (isLoggedIn()) {
                   <div class="filename" id="id-filename"></div>
                   <input type="file" id="id-file" accept="image/jpeg,image/png,image/webp" onchange="handleIdUpload(event)">
                 </div>
+                <div class="field-error" id="err-id-upload"><i class="fas fa-exclamation-circle"></i> <span></span></div>
               </div>
 
               <div id="id-method-camera" style="display:none;">
@@ -178,15 +187,15 @@ if (isLoggedIn()) {
                 </div>
               </div>
 
-              <div id="id-extracted" style="display:none; margin-top:1.25rem; background:#f8fafc; border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
-                <p style="font-size:0.8rem; font-weight:600; margin-bottom:0.75rem;"><i class="fas fa-check-circle" style="color:var(--success)"></i> ID validated</p>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.85rem;">
-                  <div><span style="color:var(--text-muted)">Full Name:</span><br><strong id="id-name">—</strong></div>
-                  <div><span style="color:var(--text-muted)">ID Number:</span><br><strong id="id-number">—</strong></div>
-                  <div><span style="color:var(--text-muted)">Type:</span><br><strong id="id-type">—</strong></div>
-                  <div><span style="color:var(--text-muted)">Source:</span><br><strong id="id-source">—</strong></div>
+              <div id="id-extracted" class="id-extracted-card" style="display:none;">
+                <p style="font-size:0.9rem; font-weight:600; margin-bottom:0.75rem; color:#6ee7b7;"><i class="fas fa-check-circle"></i> ID validated</p>
+                <div class="id-meta">
+                  <div><span>Full Name:</span><strong id="id-name">—</strong></div>
+                  <div><span>ID Number:</span><strong id="id-number">—</strong></div>
+                  <div><span>Type:</span><strong id="id-type">—</strong></div>
+                  <div><span>Source:</span><strong id="id-source">—</strong></div>
                 </div>
-                <p id="id-ocr-status" style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;"></p>
+                <p id="id-ocr-status" style="font-size:0.8rem; color:var(--text-muted); margin-top:0.75rem;"></p>
               </div>
 
               <div style="display:flex; gap:10px; margin-top:1.25rem;">
@@ -239,10 +248,11 @@ if (isLoggedIn()) {
             <h2>Reset Password</h2>
             <p class="subtitle">Enter your registered email address and we'll send you a link to reset your password.</p>
             <div id="forgot-alert"></div>
-            <form id="forgot-form" onsubmit="return handleForgot(event)">
+            <form id="forgot-form" onsubmit="return handleForgot(event)" novalidate>
               <div class="form-group">
                 <label>Email Address <span class="required">*</span></label>
-                <input type="email" class="form-control" id="forgot-email" placeholder="you@example.com" required>
+                <input type="email" class="form-control" id="forgot-email" placeholder="you@example.com" autocomplete="email">
+                <div class="field-error" id="err-forgot-email"><i class="fas fa-exclamation-circle"></i> <span></span></div>
               </div>
               <button type="submit" class="btn btn-primary" id="forgot-btn"><i class="fas fa-paper-plane"></i> Send Temporary Password</button>
             </form>
@@ -258,10 +268,11 @@ if (isLoggedIn()) {
               <i class="fas fa-envelope"></i>
               <span>Code sent to <strong id="verify-email-display"></strong></span>
             </div>
-            <form id="verify-form" onsubmit="return handleVerify(event)">
+            <form id="verify-form" onsubmit="return handleVerify(event)" novalidate>
               <div class="form-group">
                 <label>Verification Code <span class="required">*</span></label>
-                <input type="text" class="form-control" id="verify-code" placeholder="6-digit code" maxlength="6" required style="text-align:center; letter-spacing:0.3em; font-size:1.25rem;">
+                <input type="text" class="form-control" id="verify-code" placeholder="6-digit code" maxlength="6" inputmode="numeric" style="text-align:center; letter-spacing:0.3em; font-size:1.25rem;">
+                <div class="field-error" id="err-verify-code"><i class="fas fa-exclamation-circle"></i> <span></span></div>
               </div>
               <button type="submit" class="btn btn-primary"><i class="fas fa-check-circle"></i> Verify Email</button>
             </form>
