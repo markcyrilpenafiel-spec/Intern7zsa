@@ -324,6 +324,97 @@ body::before {
   background: rgba(15, 20, 40, 0.8);
 }
 
+.form-control.is-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25), 0 0 12px rgba(239, 68, 68, 0.2) !important;
+  background: rgba(40, 15, 15, 0.6);
+}
+
+.form-control.is-invalid:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35), 0 0 15px rgba(239, 68, 68, 0.25) !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-8px); }
+  30% { transform: translateX(8px); }
+  45% { transform: translateX(-6px); }
+  60% { transform: translateX(6px); }
+  75% { transform: translateX(-3px); }
+  90% { transform: translateX(3px); }
+}
+
+.form-control.shake,
+.checkbox-group.shake,
+.file-upload.shake,
+.id-type-grid.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.field-error {
+  display: none;
+  margin-top: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #fca5a5;
+  line-height: 1.35;
+}
+
+.field-error.visible {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.field-error i {
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: #f87171;
+}
+
+.checkbox-group.is-invalid {
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.file-upload.is-invalid {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.id-extracted-card {
+  margin-top: 1.25rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--text-light);
+}
+
+.id-extracted-card .id-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.id-extracted-card .id-meta span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.id-extracted-card .id-meta strong {
+  color: var(--text-white);
+  font-weight: 600;
+  display: block;
+  margin-top: 2px;
+  word-break: break-word;
+}
+
 .input-with-icon {
   position: relative;
 }
