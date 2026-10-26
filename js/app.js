@@ -53,6 +53,76 @@ function showAlert(containerId, type, message) {
   el.innerHTML = `<div class="alert alert-${type}"><i class="fas fa-${icons[type] || 'info-circle'}"></i> ${message}</div>`;
 }
 
+function setFieldError(inputId, message, extraTargetId) {
+  const input = document.getElementById(inputId);
+  const err = document.getElementById('err-' + inputId) || (extraTargetId ? document.getElementById(extraTargetId) : null);
+  if (input) {
+    input.classList.add('is-invalid');
+    input.classList.remove('shake');
+    void input.offsetWidth;
+    input.classList.add('shake');
+  }
+  if (err) {
+    const span = err.querySelector('span');
+    if (span) span.textContent = message;
+    else err.innerHTML = `<i class="fas fa-exclamation-circle"></i> <span>${message}</span>`;
+    err.classList.add('visible');
+  }
+}
+
+function clearFieldError(inputId, extraTargetId) {
+  const input = document.getElementById(inputId);
+  const err = document.getElementById('err-' + inputId) || (extraTargetId ? document.getElementById(extraTargetId) : null);
+  if (input) input.classList.remove('is-invalid', 'shake');
+  if (err) {
+    err.classList.remove('visible');
+    const span = err.querySelector('span');
+    if (span) span.textContent = '';
+  }
+}
+
+function setGroupError(groupId, errId, message) {
+  const group = document.getElementById(groupId);
+  const err = document.getElementById(errId);
+  if (group) {
+    group.classList.add('is-invalid');
+    group.classList.remove('shake');
+    void group.offsetWidth;
+    group.classList.add('shake');
+  }
+  if (err) {
+    const span = err.querySelector('span');
+    if (span) span.textContent = message;
+    else err.innerHTML = `<i class="fas fa-exclamation-circle"></i> <span>${message}</span>`;
+    err.classList.add('visible');
+  }
+}
+
+function clearGroupError(groupId, errId) {
+  const group = document.getElementById(groupId);
+  const err = document.getElementById(errId);
+  if (group) group.classList.remove('is-invalid', 'shake');
+  if (err) {
+    err.classList.remove('visible');
+    const span = err.querySelector('span');
+    if (span) span.textContent = '';
+  }
+}
+
+function clearAllSignupFieldErrors() {
+  ['signup-name', 'signup-email', 'signup-password', 'signup-password2'].forEach(id => clearFieldError(id));
+  clearGroupError('signup-policies-group', 'err-signup-policies');
+  clearFieldError('id-file', 'err-id-upload');
+  const upload = document.getElementById('id-upload-area');
+  if (upload) upload.classList.remove('is-invalid', 'shake');
+}
+
+function clearAllLoginFieldErrors() {
+  clearFieldError('login-email');
+  clearFieldError('login-password');
+  clearGroupError('login-policies-group', 'err-login-policies');
+}
+
 function togglePassword(inputId, btn) {
   const input = document.getElementById(inputId);
   const icon = btn.querySelector('i');
@@ -159,16 +229,30 @@ document.getElementById('policies-modal')?.addEventListener('click', function (e
 /* ---------- Login (password) ---------- */
 async function handleLogin(e) {
   e.preventDefault();
+  clearAllLoginFieldErrors();
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const remember = document.getElementById('remember-me').checked ? '1' : '';
   const policies = document.getElementById('accept-policies').checked || policiesAccepted;
   const btn = document.getElementById('login-btn');
+  let ok = true;
 
-  if (!policies) {
-    showAlert('login-alert', 'error', 'You must accept the Terms of Service & Privacy Policy to log in.');
-    return false;
+  if (!email) {
+    setFieldError('login-email', 'Please enter your email address.');
+    ok = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setFieldError('login-email', 'Please enter a valid email address.');
+    ok = false;
   }
+  if (!password) {
+    setFieldError('login-password', 'Please enter your password.');
+    ok = false;
+  }
+  if (!policies) {
+    setGroupError('login-policies-group', 'err-login-policies', 'You must accept the Terms of Service & Privacy Policy to log in.');
+    ok = false;
+  }
+  if (!ok) return false;
 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Signing in...';
@@ -364,51 +448,94 @@ function nextSignupStep(step) {
     if (h) h.textContent = t[0];
     if (s) s.textContent = t[1];
   }
+  // Clear top alert when changing steps so Terms error does not stick after step 1
+  const alertEl = document.getElementById('signup-alert');
+  if (alertEl) alertEl.innerHTML = '';
   if (step === 3) {
     document.getElementById('signup-submit-btn').disabled = true;
   }
 }
 
 function validateSignupStep1() {
+  clearAllSignupFieldErrors();
   const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pass = document.getElementById('signup-password').value;
   const pass2 = document.getElementById('signup-password2').value;
   const policies = document.getElementById('signup-policies').checked || policiesAccepted;
+  let ok = true;
 
-  if (!name || !email || !pass) {
-    showAlert('signup-alert', 'error', 'Please fill in all required fields.');
-    return false;
+  if (!name) {
+    setFieldError('signup-name', 'Please enter your full name.');
+    ok = false;
   }
-  if (pass.length < 8) {
-    showAlert('signup-alert', 'error', 'Password must be at least 8 characters.');
-    return false;
+  if (!email) {
+    setFieldError('signup-email', 'Please enter your email address.');
+    ok = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setFieldError('signup-email', 'Please enter a valid email address.');
+    ok = false;
   }
-  if (pass !== pass2) {
-    showAlert('signup-alert', 'error', 'Passwords do not match.');
-    return false;
+  if (!pass) {
+    setFieldError('signup-password', 'Please enter a password.');
+    ok = false;
+  } else if (pass.length < 8) {
+    setFieldError('signup-password', 'Password must be at least 8 characters.');
+    ok = false;
+  }
+  if (!pass2) {
+    setFieldError('signup-password2', 'Please confirm your password.');
+    ok = false;
+  } else if (pass && pass !== pass2) {
+    setFieldError('signup-password2', 'Passwords do not match.');
+    ok = false;
   }
   if (!policies) {
-    showAlert('signup-alert', 'error', 'You must accept the Terms of Service & Privacy Policy.');
-    return false;
+    setGroupError('signup-policies-group', 'err-signup-policies', 'You must accept the Terms of Service & Privacy Policy.');
+    ok = false;
   }
-  return true;
+  return ok;
 }
 
 function goSignupStep2() {
   if (!validateSignupStep1()) return;
+  clearAllSignupFieldErrors();
+  const alertEl = document.getElementById('signup-alert');
+  if (alertEl) alertEl.innerHTML = '';
   nextSignupStep(2);
 }
 
 function goSignupStep3() {
+  clearFieldError('id-file', 'err-id-upload');
+  const upload = document.getElementById('id-upload-area');
+  if (upload) upload.classList.remove('is-invalid', 'shake');
+
   if (!idFile || !extractedIdInfo || !idHasFace) {
-    showAlert('signup-alert', 'error', 'Please upload a valid ID with a detectable face first.');
+    const msg = 'Please upload or capture a clear photo of your real government ID first.';
+    const err = document.getElementById('err-id-upload');
+    if (err) {
+      const span = err.querySelector('span');
+      if (span) span.textContent = msg;
+      err.classList.add('visible');
+    }
+    if (upload) {
+      upload.classList.add('is-invalid');
+      upload.classList.remove('shake');
+      void upload.offsetWidth;
+      upload.classList.add('shake');
+    }
+    showAlert('signup-alert', 'error', msg);
     return;
   }
   if (idOcrScore < 25) {
     showAlert('signup-alert', 'error', 'ID text validation failed. Upload a clearer photo of a real government ID.');
+    if (upload) {
+      upload.classList.add('is-invalid', 'shake');
+    }
     return;
   }
+  const alertEl = document.getElementById('signup-alert');
+  if (alertEl) alertEl.innerHTML = '';
   nextSignupStep(3);
   ensureFaceModels();
 }
@@ -552,7 +679,7 @@ async function processIdCanvas(canvas, sourceLabel, fileObj) {
   }
 
   const nameFromForm = document.getElementById('signup-name').value.trim() || 'Detected Name';
-  const idNumber = extractIdNumberFromText(idOcrText);
+  const idNumber = extractIdNumberFromText(idOcrText) || 'Not clearly readable';
 
   extractedIdInfo = {
     fullName: nameFromForm,
@@ -562,14 +689,19 @@ async function processIdCanvas(canvas, sourceLabel, fileObj) {
     faceQuality: faceQ
   };
 
-  document.getElementById('id-name').textContent = extractedIdInfo.fullName;
-  document.getElementById('id-number').textContent = extractedIdInfo.idNumber;
-  document.getElementById('id-type').textContent = extractedIdInfo.idType;
-  document.getElementById('id-source').textContent = sourceLabel;
+  document.getElementById('id-name').textContent = extractedIdInfo.fullName || '—';
+  document.getElementById('id-number').textContent = extractedIdInfo.idNumber || '—';
+  document.getElementById('id-type').textContent = extractedIdInfo.idType || '—';
+  document.getElementById('id-source').textContent = sourceLabel || '—';
   document.getElementById('id-ocr-status').innerHTML =
     `<i class="fas fa-shield-alt"></i> Face on ID · quality ${faceQ}% · document score ${idOcrScore}/100`;
   document.getElementById('id-extracted').style.display = 'block';
   document.getElementById('id-continue-btn').disabled = false;
+
+  // Clear upload validation state on success
+  clearFieldError('id-file', 'err-id-upload');
+  const uploadArea = document.getElementById('id-upload-area');
+  if (uploadArea) uploadArea.classList.remove('is-invalid', 'shake');
 
   const fnEl = document.getElementById('id-filename');
   if (fnEl && fileObj) fnEl.textContent = fileObj.name || 'Captured';
@@ -910,8 +1042,17 @@ async function handleSignup() {
 /* ---------- Verify / Resend / Forgot ---------- */
 async function handleVerify(e) {
   e.preventDefault();
+  clearFieldError('verify-code');
   const code = document.getElementById('verify-code').value.trim();
   const email = pendingVerifyEmail || document.getElementById('verify-email-display').textContent;
+  if (!code) {
+    setFieldError('verify-code', 'Please enter the 6-digit verification code.');
+    return false;
+  }
+  if (!/^\d{6}$/.test(code)) {
+    setFieldError('verify-code', 'Code must be exactly 6 digits.');
+    return false;
+  }
   try {
     const data = await api('verify', { email, code });
     if (data.ok) {
@@ -919,6 +1060,7 @@ async function handleVerify(e) {
       setTimeout(() => showPanel('login'), 1200);
     } else {
       showAlert('verify-alert', 'error', data.message);
+      setFieldError('verify-code', data.message || 'Invalid code.');
     }
   } catch (err) {
     showAlert('verify-alert', 'error', 'Network error.');
@@ -942,7 +1084,16 @@ async function resendCode() {
 
 async function handleForgot(e) {
   e.preventDefault();
+  clearFieldError('forgot-email');
   const email = document.getElementById('forgot-email').value.trim();
+  if (!email) {
+    setFieldError('forgot-email', 'Please enter your email address.');
+    return false;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setFieldError('forgot-email', 'Please enter a valid email address.');
+    return false;
+  }
   const btn = document.getElementById('forgot-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Sending...';
@@ -960,4 +1111,27 @@ async function handleForgot(e) {
 /* ---------- Init ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => ensureFaceModels(), 1500);
+
+  // Clear field errors as the user types / changes
+  const fieldMap = [
+    ['login-email', 'login-email'],
+    ['login-password', 'login-password'],
+    ['signup-name', 'signup-name'],
+    ['signup-email', 'signup-email'],
+    ['signup-password', 'signup-password'],
+    ['signup-password2', 'signup-password2'],
+    ['forgot-email', 'forgot-email'],
+    ['verify-code', 'verify-code']
+  ];
+  fieldMap.forEach(([id]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => clearFieldError(id));
+      el.addEventListener('change', () => clearFieldError(id));
+    }
+  });
+  const polLogin = document.getElementById('accept-policies');
+  if (polLogin) polLogin.addEventListener('change', () => clearGroupError('login-policies-group', 'err-login-policies'));
+  const polSignup = document.getElementById('signup-policies');
+  if (polSignup) polSignup.addEventListener('change', () => clearGroupError('signup-policies-group', 'err-signup-policies'));
 });
